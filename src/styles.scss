@@ -1,1 +1,16 @@
-/* You can add global styles to this file, and also import other style files */
+@use '../node_modules/bootstrap/scss/bootstrap' as *;
+@use '@fontsource/poppins'; // Keep for CSS font import
+
+body {
+    font-family: 'Poppins', sans-serif !important;
+    background-color: #15202b !important;
+    color: rgb(255, 255, 255);
+
+    &::-webkit-scrollbar {
+        width: 0;
+    }
+}
+
+.bg-custom {
+    background-color: #12171d !important;
+}
