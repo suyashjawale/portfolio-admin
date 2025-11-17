@@ -58,6 +58,16 @@
         [ngModelOptions]="{standalone: true}">
 </div>
 
+<div class="fw-medium mb-2">
+    Priority
+</div>
+
+<select class="form-select mb-4" aria-label="Small select example" [(ngModel)]="priority">
+    @for (item of songList(); let i = $index; track i) {
+        <option [value]="i+1">{{i+1}}</option>
+    }
+</select>
+
 <div class="text-end">
     @if(ongoing()){
     <button class="btn btn-outline-light px-5" disabled>
@@ -78,10 +88,11 @@
         <div class="my-1 px-3">{{song.songName}}</div>
         <div class="my-1 px-3">{{song.artist}}</div>
         <div class="mt-1 mb-3 px-3">{{song.yt_link}}</div>
-        <div class="position-absolute top-100 translate-middle" style="left: 81%;">
+        <div class="position-absolute top-100 translate-middle" style="left: 72%;">
             <div class="d-flex gap-2">
-            <button class="btn btn-success btn-sm">Edit</button>
-            <button class="btn btn-danger btn-sm">Delete</button>
+                <button class="btn btn-light btn-sm text-nowrap">Rank {{song.rank}}</button>
+                <button class="btn btn-success btn-sm">Edit</button>
+                <button class="btn btn-danger btn-sm">Delete</button>
             </div>
         </div>
     </div>

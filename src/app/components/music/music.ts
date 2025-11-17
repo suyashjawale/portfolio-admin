@@ -21,6 +21,7 @@ export class Music {
 	yt_link: string = '';
 	customName: string = '';
 	ongoing = signal<boolean>(false);
+	priority: number = 1;
 
 	@ViewChild("musicTag") musicTag!: ElementRef;
 	@ViewChild("imageTag") imageTag!: ElementRef;
@@ -34,7 +35,7 @@ export class Music {
 	updateSongList() {
 		this.http.get<Song[]>('https://dashing-llama-639318.netlify.app/.netlify/functions/fetchSongs').subscribe({
 			next: (data) => {
-				this.songList.set(data);
+				this.songList.set(data.sort((a, b) => b.queueNumber - a.queueNumber));
 			},
 			error: err => {
 				alert("Error fetching songs")
@@ -87,7 +88,9 @@ export class Music {
 						"thumbnailLink": thumnailUrl,
 						"youtube_link": this.yt_link,
 						"customName": this.customName,
-						"password": this.stateService.password()
+						"password": this.stateService.password(),
+						"rank": this.priority, 
+						"queueNumber" : this.songList.length,
 					}).subscribe({
 						next: (data) => {
 							this.musicTag.nativeElement.value = null;
