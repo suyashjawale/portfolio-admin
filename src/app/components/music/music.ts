@@ -90,7 +90,7 @@ export class Music {
 						"customName": this.customName,
 						"password": this.stateService.password(),
 						"rank": this.priority, 
-						"queueNumber" : this.songList.length,
+						"queueNumber" : this.songList().length,
 					}).subscribe({
 						next: (data) => {
 							this.musicTag.nativeElement.value = null;
