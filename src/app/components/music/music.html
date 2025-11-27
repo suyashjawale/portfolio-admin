@@ -9,7 +9,9 @@
 <div class="fw-medium mb-2">
     Upload Music File
 </div>
-
+@if(previewAudio()){
+<audio [src]="previewAudio()" controls class="w-100 my-3"></audio>
+}
 <div class="mb-4">
     <input type="file" class="form-control" #musicTag (change)="musicTagChange($event)" accept=".mp3" />
 </div>
@@ -17,7 +19,9 @@
 <div class="fw-medium mb-2">
     Upload Thumbnail
 </div>
-
+@if(previewUrl()){
+<img class="img-fluid mb-3 rounded" [src]="previewUrl()" />
+}
 <div class="mb-4">
     <input type="file" class="form-control" #imageTag (change)="imageTagChange($event)" accept=".jpg,.webp,.png">
 </div>
@@ -55,16 +59,17 @@
 
 <div class="mb-4">
     <input type="text" class="form-control" placeholder="Filename" [(ngModel)]="customName"
-        [ngModelOptions]="{standalone: true}">
+        [ngModelOptions]="{standalone: true}" [disabled]="editMode()">
 </div>
 
 <div class="fw-medium mb-2">
     Priority
 </div>
 
-<select class="form-select mb-4" aria-label="Small select example" [(ngModel)]="priority">
+<select class="form-select mb-4" aria-label="Small select example" [(ngModel)]="priority"
+    [ngModelOptions]="{standalone: true}">
     @for (item of songList(); let i = $index; track i) {
-        <option [value]="i+1">{{i+1}}</option>
+    <option [value]="i+1">{{i+1}}</option>
     }
 </select>
 
@@ -77,24 +82,64 @@
     </button>
     }
     @else {
-    <button class="btn btn-outline-light" (click)="uploadMusic()">Upload</button>
+    <button class="btn btn-outline-light me-2" (click)="reset()">Reset</button>
+    <button class="btn btn-outline-light" (click)="uploadMusic()">
+        @if(editMode()){
+        Edit
+        }
+        @else {
+        Upload
+        }
+    </button>
     }
 </div>
 
 <hr class="my-4" />
 <div>
-    @for(song of songList(); track $index) {
+    <div class="d-flex justify-content-between align-items-center gap-2 mb-4">
+        <div class="fw-medium text-nowrap flex-grow-1">
+            Sort
+        </div>
+
+        <select class="form-select form-select-sm ms-5" aria-label="Small select example"
+            [ngModelOptions]="{standalone: true}" [(ngModel)]="sortSeries">
+            <option value="asc">Asc</option>
+            <option value="desc">Desc</option>
+        </select>
+        <select class="form-select form-select-sm" aria-label="Small select example"
+            [ngModelOptions]="{standalone: true}" [(ngModel)]="sortCriteria">
+            <option value="queueNumber">Queue Number</option>
+            <option value="rank">Rank</option>
+        </select>
+    </div>
+
+
+    @for(song of songList() | sort:sortSeries:sortCriteria; track $index) {
     <div class="bg-custom py-2 mb-5 rounded position-relative">
         <div class="my-1 px-3">{{song.songName}}</div>
         <div class="my-1 px-3">{{song.artist}}</div>
         <div class="mt-1 mb-3 px-3">{{song.yt_link}}</div>
-        <div class="position-absolute top-100 translate-middle" style="left: 72%;">
+        <div class="position-absolute top-100 translate-middle-y" style="left: 47%;">
             <div class="d-flex gap-2">
-                <button class="btn btn-light btn-sm text-nowrap">Rank {{song.rank}}</button>
-                <button class="btn btn-success btn-sm">Edit</button>
-                <button class="btn btn-danger btn-sm">Delete</button>
+                <select class="form-select form-select-sm" aria-label="Small select example" [(ngModel)]="song.tempRank"
+                    [ngModelOptions]="{standalone: true}" [disabled]="!stateService.loggedIn() || holdEdit()"
+                    (change)="updateRank(song)">
+                    @for (item of songList(); let i = $index; track i) {
+                    <option [value]="i+1">{{i+1}}</option>
+                    }
+                </select>
+                <button class="btn btn-success btn-sm" (click)="selectEditable(song)">Edit</button>
+                <button class="btn btn-danger btn-sm" (click)="deleteFile(song)">Delete</button>
             </div>
         </div>
     </div>
     }
 </div>
+
+@if(ongoing()){
+<div class="fixed-top vh-100 opacity-75 bg-custom d-flex justify-content-center align-items-center ">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+}

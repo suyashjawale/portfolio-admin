@@ -7,4 +7,6 @@ export interface Song {
     songName: string;
     thumbnail: string;
     yt_link: string;
+    customName :string;
+    tempRank:number;
 }
