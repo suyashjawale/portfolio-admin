@@ -11,7 +11,7 @@ import { HttpClient } from '@angular/common/http';
 	styleUrl: './app.scss'
 })
 export class App {
-	screenName: string = 'music';
+	screenName: string = 'posts';
 	constructor(private router: Router, public stateService: State, private http: HttpClient) { }
 
 	switchToScreen() {

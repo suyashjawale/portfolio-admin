@@ -269,7 +269,7 @@ export class Music {
 
 		return new Promise((resolve, reject) => {
 
-			const dropboxPath = "/" + this.customName + fileExtension;
+			const dropboxPath = "/Music" + this.customName + fileExtension;
 
 			const headersUpload = new HttpHeaders({
 				"Authorization": `Bearer ${this.stateService.dropbox_access_token()}`,

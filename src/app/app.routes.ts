@@ -2,11 +2,12 @@ import { Routes } from '@angular/router';
 import { Music } from './components/music/music';
 import { Birthday } from './components/birthday/birthday';
 import { Collection } from './components/collection/collection';
+import { Posts } from './components/posts/posts';
 
 export const routes: Routes = [
     {
         path: "",
-        redirectTo: 'music',
+        redirectTo: 'posts',
         pathMatch: 'full'
     },
     {
@@ -17,8 +18,12 @@ export const routes: Routes = [
         path: 'birthday',
         component: Birthday
     },
-        {
+    {
         path: 'collection',
         component: Collection
+    },
+    {
+        path: 'posts',
+        component: Posts
     }
 ];

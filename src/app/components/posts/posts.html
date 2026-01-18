@@ -1,0 +1,116 @@
+@if(error.length>0){
+<div class="alert alert-primary bg-primary text-white" role="alert">
+    @for (err of error; track $index) {
+    <small>{{err}}</small><br />
+    }
+</div>
+}
+
+<div class="fw-medium mb-2">
+    Upload Image
+</div>
+
+@if(previewUrl()){
+<img class="img-fluid mb-3" [src]="previewUrl()" #imgElement (load)="onImageLoad(imgElement.height)" />
+}
+
+<div class="mb-4">
+    <input type="file" class="form-control" #imageTag (change)="imageTagChange($event)" accept=".jpg,.webp,.png">
+</div>
+
+<div class="fw-medium mb-2">
+    Identifier
+</div>
+
+<div class="mb-4">
+    <input type="text" class="form-control" placeholder="Identifier" [(ngModel)]="identifier"
+        [ngModelOptions]="{standalone: true}">
+</div>
+
+<div class="fw-medium mb-2">
+    Image Caption
+</div>
+
+<div class="mb-4">
+    <input type="text" class="form-control" placeholder="Caption" [(ngModel)]="alternate_text"
+        [ngModelOptions]="{standalone: true}">
+</div>
+
+<div class="fw-medium mb-2">
+    Title
+</div>
+
+<div class="mb-4">
+    <input type="text" class="form-control" placeholder="Post Title" [(ngModel)]="title"
+        [ngModelOptions]="{standalone: true}">
+</div>
+
+<div class="fw-medium mb-2">
+    Body
+</div>
+
+<div class="mb-4">
+    <input type="text" class="form-control" placeholder="Post Body" [(ngModel)]="body"
+        [ngModelOptions]="{standalone: true}">
+</div>
+
+<div class="fw-medium mb-2">
+    Location
+</div>
+
+<div class="mb-4">
+    <input type="text" class="form-control" placeholder="Location" [(ngModel)]="location"
+        [ngModelOptions]="{standalone: true}">
+</div>
+
+<div class="form-check class mb-4">
+    <input class="form-check-input" type="checkbox" id="checkChecked" [(ngModel)]="addToCollection"
+        (change)="addToCollectionSelected()">
+    <label class="form-check-label" for="checkChecked">
+        Add To Collection
+    </label>
+</div>
+
+@if(addToCollection() && previewUrl()){
+
+<div class="fw-medium mb-2">
+    Description
+</div>
+
+<div class="mb-4">
+    <input type="text" class="form-control" placeholder="Image Description" [(ngModel)]="desc"
+        [ngModelOptions]="{standalone: true}">
+</div>
+
+<div class="fw-medium mb-2">
+    Priority
+</div>
+
+<select class="form-select mb-4" aria-label="Small select example" [(ngModel)]="priority"
+    [ngModelOptions]="{standalone: true}">
+    @for (item of image_list(); let i = $index; track i) {
+    <option [value]="i+1">{{i+1}}</option>
+    }
+</select>
+}
+
+<div class="text-end my-4">
+    @if(ongoing()){
+    <button class="btn btn-outline-light px-5" disabled>
+        <div class="spinner-border spinner-border-sm" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </button>
+    }
+    @else {
+    <button class="btn btn-outline-light me-2" (click)="reset()">Reset</button>
+    <button class="btn btn-outline-light" (click)="uploadPost()">
+        @if(editMode()){
+        Edit
+        }
+        @else {
+        Submit Post
+        }
+    </button>
+    }
+</div>
