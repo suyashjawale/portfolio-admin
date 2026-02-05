@@ -2,11 +2,13 @@ export interface Song {
     artist: string;
     fileName: string;
     playingSong: boolean;
-    rank:number;
-    queueNumber:number;
+    rank: number;
+    queueNumber: number;
     songName: string;
     thumbnail: string;
     yt_link: string;
-    customName :string;
-    tempRank:number;
+    customName: string;
+    tempRank: number;
+    musicExt: string,
+    imageExt: string
 }

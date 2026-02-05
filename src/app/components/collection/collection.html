@@ -11,7 +11,7 @@
 </div>
 
 @if(previewUrl()){
-<img class="img-fluid mb-3" [src]="previewUrl()" #imgElement (load)="onImageLoad(imgElement.height)" />
+<img class="img-fluid mb-3" [src]="previewUrl()" #imgElement (load)="onImageLoad(imgElement.height,imgElement.width)" />
 }
 
 <div class="mb-4">
@@ -99,7 +99,10 @@
                 <option [value]="i+1">{{i+1}}</option>
                 }
             </select>
-            <button class="btn btn-outline-light btn-sm" (click)="selectEditable(item)" [disabled]="!stateService.loggedIn() || holdEdit()">Edit</button>
+            <button class="btn btn-outline-light btn-sm" (click)="deleteItem(item)"
+                [disabled]="!stateService.loggedIn() || holdEdit()">Delete</button>
+            <button class="btn btn-outline-light btn-sm" (click)="selectEditable(item)"
+                [disabled]="!stateService.loggedIn() || holdEdit()">Edit</button>
         </div>
         }
     </div>
@@ -115,7 +118,10 @@
                 <option [value]="i+1">{{i+1}}</option>
                 }
             </select>
-            <button class="btn btn-outline-light btn-sm" (click)="selectEditable(item)" [disabled]="!stateService.loggedIn() || holdEdit()">Edit</button>
+            <button class="btn btn-outline-light btn-sm" (click)="deleteItem(item)"
+                [disabled]="!stateService.loggedIn() || holdEdit()">Delete</button>
+            <button class="btn btn-outline-light btn-sm" (click)="selectEditable(item)"
+                [disabled]="!stateService.loggedIn() || holdEdit()">Edit</button>
         </div>
         }
     </div>

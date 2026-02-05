@@ -1,8 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule, NgModel } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
-import { State } from './services/state';
 import { HttpClient } from '@angular/common/http';
+import { State } from './services/state';
 
 @Component({
 	selector: 'app-root',
@@ -11,7 +11,7 @@ import { HttpClient } from '@angular/common/http';
 	styleUrl: './app.scss'
 })
 export class App {
-	screenName: string = 'posts';
+	screenName: string = 'wisdom';
 	constructor(private router: Router, public stateService: State, private http: HttpClient) { }
 
 	switchToScreen() {
@@ -31,7 +31,7 @@ export class App {
 					this.stateService.dropbox_access_token.set(data.access_token);
 				},
 				error: (error) => {
-					alert(error.error);
+					alert(error.error.error);
 				}
 			});
 		}

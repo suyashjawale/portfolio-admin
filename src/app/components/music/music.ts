@@ -30,6 +30,9 @@ export class Music {
 	holdEdit = signal<boolean>(false);
 	previewUrl = signal<any>(null);
 	previewAudio = signal<any>(null);
+
+	previewAudioExt = signal<string>('');
+	previewImageExt = signal<string>('');
 	editMode = signal<boolean>(false);
 	selectedSong = signal<Song>({
 		artist: '',
@@ -41,7 +44,9 @@ export class Music {
 		songName: '',
 		tempRank: 0,
 		thumbnail: '',
-		yt_link: ''
+		yt_link: '',
+		imageExt: '',
+		musicExt: ''
 	});
 
 	@ViewChild("musicTag") musicTag!: ElementRef;
@@ -58,6 +63,8 @@ export class Music {
 		this.selectedSong.set(selected);
 		this.previewAudio.set(selected.fileName);
 		this.previewUrl.set(selected.thumbnail);
+		this.previewAudioExt.set(selected.musicExt);
+		this.previewImageExt.set(selected.imageExt);
 		this.artistName = selected.artist;
 		this.songName = selected.songName;
 		this.yt_link = selected.yt_link;
@@ -152,8 +159,11 @@ export class Music {
 			if (confirm("Are you sure you want to submit ?")) {
 				this.ongoing.set(true);
 				try {
-					const musicUrl = this.musicFile ? await this.uploadFiles(".mp3", this.musicFile) : this.previewAudio();
-					const thumnailUrl = this.imageFile ? await this.uploadFiles("." + this.imageFile.name.split(".")[1], this.imageFile) : this.previewUrl();
+					const musicExt = this.previewAudioExt() == '' ? "." + this.musicFile.name.split(".")[1] : this.previewAudioExt();
+					const imageExt = this.previewImageExt() == '' ? "." + this.imageFile.name.split(".")[1] : this.previewImageExt();
+
+					const musicUrl = this.musicFile ? await this.uploadFiles(musicExt, this.musicFile) : this.previewAudio();
+					const thumnailUrl = this.imageFile ? await this.uploadFiles(imageExt, this.imageFile) : this.previewUrl();
 
 					this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addSong', {
 						"songName": this.songName.trim(),
@@ -161,10 +171,12 @@ export class Music {
 						"songLink": musicUrl,
 						"thumbnailLink": thumnailUrl,
 						"youtube_link": this.yt_link.trim(),
-						"customName": this.customName.trim(),
+						"customName": this.customName.trim().replaceAll(" ", "_").toLowerCase(),
 						"password": this.stateService.password().trim(),
 						"rank": this.priority,
 						"queueNumber": this.songList().length,
+						"musicExt": musicExt,
+						"imageExt": imageExt
 					}).subscribe({
 						next: (data) => {
 							this.reset();
@@ -206,10 +218,14 @@ export class Music {
 			songName: '',
 			tempRank: 0,
 			thumbnail: '',
-			yt_link: ''
+			yt_link: '',
+			musicExt: '',
+			imageExt: ''
 		});
 		this.previewAudio.set(null);
 		this.previewUrl.set(null);
+		this.previewAudioExt.set('');
+		this.previewImageExt.set('');
 		this.artistName = '';
 		this.songName = '';
 		this.yt_link = '';
@@ -224,8 +240,8 @@ export class Music {
 		if (this.stateService.loggedIn()) {
 			if (confirm("Are you sure you want to submit ?")) {
 				this.ongoing.set(true);
-				await this.deleteFromDropbox(`/${song.customName}.webp`)
-				await this.deleteFromDropbox(`/${song.customName}.mp3`)
+				await this.deleteFromDropbox(`/Music/${song.customName}${song.imageExt}`)
+				await this.deleteFromDropbox(`/Music/${song.customName}${song.musicExt}`)
 				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deleteSong", {
 					"customName": song.customName,
 					"password": this.stateService.password()
@@ -268,8 +284,7 @@ export class Music {
 	uploadFiles(fileExtension: string, ogFile: File): Promise<string> {
 
 		return new Promise((resolve, reject) => {
-
-			const dropboxPath = "/Music" + this.customName + fileExtension;
+			const dropboxPath = "/Music/" + this.customName.trim().replaceAll(" ", "_").toLowerCase() + fileExtension;
 
 			const headersUpload = new HttpHeaders({
 				"Authorization": `Bearer ${this.stateService.dropbox_access_token()}`,

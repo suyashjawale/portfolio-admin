@@ -36,6 +36,7 @@ export class Posts {
 	ongoing = signal<boolean>(false);
 	editMode = signal<boolean>(false);
 	currentImageHeight = signal<number>(0);
+	currentImageWidth = signal<number>(0);
 	unique_identifer = signal<string[]>([]);
 	image_list = signal<number[]>([]);
 	selectedPost = signal<IPost>({
@@ -50,6 +51,8 @@ export class Posts {
 		password: ''
 	})
 
+	posts = signal<any>([]);
+
 	@ViewChild("imageTag") imageTag!: ElementRef;
 
 	imageTagChange(event: any) {
@@ -61,7 +64,7 @@ export class Posts {
 		reader.readAsDataURL(this.imageFile);
 	}
 
-	constructor(private http: HttpClient, private stateService: State) { }
+	constructor(private http: HttpClient, public stateService: State) { }
 
 	ngOnInit() {
 		this.http.get<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getCollection').subscribe({
@@ -70,9 +73,26 @@ export class Posts {
 				this.image_list.set(Array.from({ length: data.length + 1 }, (v, i) => i));
 			}
 		});
+
+		this.getPosts();
+	}
+
+	getPosts() {
+		let input = prompt("Enter your number");
+		this.http.post<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getPosts', { "number": input }).subscribe({
+			next: data => {
+				this.posts.set(data['posts'].map((element: any) => {
+					return { ...element, 'isDisabled': true }
+				}));
+			},
+			error: err => {
+				this.posts.set([])
+			}
+		});
 	}
 
 	async uploadPost() {
+		this.error = [];
 		if (this.body.trim() == '')
 			this.error.push("Post body is missing")
 
@@ -98,8 +118,10 @@ export class Posts {
 				try {
 					let imageUrl = '';
 
+					let imageExt = '';
 					if (this.imageFile || this.previewUrl()) {
-						imageUrl = this.imageFile ? await this.uploadFiles("." + this.imageFile.name.split(".")[1], this.imageFile) : this.previewUrl();
+						imageExt = "." + this.imageFile.name.split(".")[1];
+						imageUrl = this.imageFile ? await this.uploadFiles(imageExt, this.imageFile) : this.previewUrl();
 					}
 
 					this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addPost', {
@@ -111,7 +133,10 @@ export class Posts {
 						title: this.title,
 						postBody: this.body,
 						timestamp: new Date(),
-						password: this.stateService.password()
+						password: this.stateService.password(),
+						imageExt: imageExt,
+						height: this.currentImageHeight(),
+						width: this.currentImageWidth()
 					}).subscribe({
 						next: (data) => {
 
@@ -120,21 +145,31 @@ export class Posts {
 									altText: this.alternate_text,
 									description: this.desc,
 									height: this.currentImageHeight(),
+									width: this.currentImageWidth(),
 									identifier: this.identifier.trim().replaceAll(" ", "_").toLowerCase(),
 									location: this.location,
 									priority: this.priority,
 									url: imageUrl,
 									password: this.stateService.password(),
-									uploadDate: new Date()
+									uploadDate: new Date(),
+									imageExt: imageExt,
+									folder: 'Posts'
 								}).subscribe({
 									next: (data) => {
+										alert("Post added successfully")
+										this.reset();
+										this.getPosts();
+									},
+									error: (err) => {
+										alert("Failed While Pushing Into Collection")
 									}
 								});
 							}
-
-							this.reset();
-							alert("Post added successfully")
-							this.fetchData();
+							else {
+								alert("Post added successfully")
+								this.reset();
+								this.getPosts();
+							}
 						},
 						error: (error) => {
 							this.error.push('Error :' + error.error);
@@ -156,8 +191,9 @@ export class Posts {
 	}
 
 
-	onImageLoad(height: number) {
+	onImageLoad(height: number, width: number) {
 		this.currentImageHeight.set(height);
+		this.currentImageWidth.set(width);
 	}
 
 	reset() {
@@ -176,15 +212,11 @@ export class Posts {
 		window.scrollTo(0, 0);
 	}
 
-	fetchData() {
-
-	}
-
 	uploadFiles(fileExtension: string, ogFile: File): Promise<string> {
 
 		return new Promise((resolve, reject) => {
 
-			const dropboxPath = "/Posts/" + this.identifier.trim() + fileExtension;
+			const dropboxPath = "/Posts/" + this.identifier.trim().replaceAll(" ", "_").toLowerCase() + fileExtension;
 
 			const headersUpload = new HttpHeaders({
 				"Authorization": `Bearer ${this.stateService.dropbox_access_token()}`,
@@ -241,5 +273,73 @@ export class Posts {
 				this.addToCollection.set(false);
 			}, 1);
 		}
+	}
+
+	editPost(item: any) {
+		this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addPost', {
+			location: item.location,
+			isCollection: item.isCollection,
+			imageUrl: item.imageUrl,
+			caption: item.caption,
+			identifier: item.identifier,
+			title: item.title,
+			postBody: item.postBody,
+			timestamp: new Date(),
+			imageExt: item.imageExt,
+			password: this.stateService.password(),
+			height: this.currentImageHeight(),
+			width: this.currentImageWidth()
+		}).subscribe({
+			next: (data) => {
+				alert("Post Updated");
+				this.getPosts();
+			},
+			error: (err: any) => {
+				alert("Oops ! Error Occured")
+			}
+		})
+	}
+
+	async deletePost(item: any) {
+		if (this.stateService.loggedIn()) {
+			if (confirm("Are you sure you want to delete ?")) {
+				this.ongoing.set(true);
+				if (item.imageUrl != '' && !item.isCollection)
+					await this.deleteFromDropbox(`/Posts/${item.identifier}${item.imageExt}`)
+				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deletePost", {
+					"customName": item.identifier,
+					"password": this.stateService.password()
+				}).subscribe({
+					next: res => {
+						this.getPosts();
+						this.ongoing.set(false);
+						this.reset();
+					}
+				})
+			}
+		}
+		else {
+			alert("Kindly Login");
+		}
+	}
+
+	deleteFromDropbox(path: string) {
+		return new Promise((resolve, reject) => {
+			const url = "https://api.dropboxapi.com/2/files/delete_v2";
+
+			const headers = new HttpHeaders({
+				"Authorization": `Bearer ${this.stateService.dropbox_access_token()}`,
+				"Content-Type": "application/json"
+			});
+
+			return this.http.post(url, { path }, { headers }).subscribe({
+				next: data => {
+					resolve("Deleted SuccessFully");
+				},
+				error: err => {
+					reject("Error in deleting")
+				}
+			});
+		})
 	}
 }

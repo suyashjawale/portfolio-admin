@@ -3,11 +3,12 @@ import { Music } from './components/music/music';
 import { Birthday } from './components/birthday/birthday';
 import { Collection } from './components/collection/collection';
 import { Posts } from './components/posts/posts';
+import { Wisdom } from './components/wisdom/wisdom';
 
 export const routes: Routes = [
     {
         path: "",
-        redirectTo: 'posts',
+        redirectTo: 'wisdom',
         pathMatch: 'full'
     },
     {
@@ -25,5 +26,9 @@ export const routes: Routes = [
     {
         path: 'posts',
         component: Posts
+    },
+    {
+        path: 'wisdom',
+        component: Wisdom
     }
 ];

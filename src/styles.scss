@@ -18,3 +18,7 @@ body {
 .bg-modal{
     background-color: #213a58 !important;
 }
+
+input:disabled ,select:disabled{
+    background-color: rgb(189, 189, 189);
+}

@@ -1,0 +1,119 @@
+@if(error.length>0){
+<div class="alert alert-primary bg-primary text-white" role="alert">
+    @for (err of error; track $index) {
+    <small>{{err}}</small><br />
+    }
+</div>
+}
+
+<div class="fw-medium mb-2">
+    Link
+</div>
+
+<div class="input-group mb-4">
+    <input type="text" class="form-control" placeholder="Article Link" [(ngModel)]="link"
+        [ngModelOptions]="{standalone: true}">
+    <button class="btn btn-success" type="button" (click)="fetchDetails()"
+        [disabled]="!stateService.loggedIn()">Fetch</button>
+</div>
+
+@if(title()!='' && stateService.loggedIn()){
+
+<img class="img-fluid mb-3" [src]="previewUrl()" #imgElement (load)="onImageLoad(imgElement.height,imgElement.width)" />
+
+<div class="fw-medium mb-2">
+    Identifier
+</div>
+<div class="mb-4">
+    <input type="text" class="form-control" placeholder="Identifier" [(ngModel)]="identifier"
+        [ngModelOptions]="{standalone: true}">
+</div>
+
+<div class="fw-medium mb-2">
+    Title
+</div>
+<div class="mb-4">
+    <input type="text" class="form-control" placeholder="Title" [(ngModel)]="title"
+        [ngModelOptions]="{standalone: true}" disabled>
+</div>
+
+<div class="fw-medium mb-2">
+    Description
+</div>
+<div class="mb-4">
+    <input type="text" class="form-control" placeholder="Identifier" [(ngModel)]="description"
+        [ngModelOptions]="{standalone: true}" disabled>
+</div>
+
+<div class="fw-medium mb-2">
+    Zip file download link
+</div>
+
+<div class="input-group mb-2">
+    <input type="text" class="form-control" placeholder="Identifier" value="https://saveweb2zip.com/en" disabled>
+    <button class="btn btn-success" type="button" (click)="openLink('https://saveweb2zip.com/en')">Visit</button>
+</div>
+<div class="text-center">Or use this</div>
+<div class="input-group mb-4 mt-2">
+    <input type="text" class="form-control" placeholder="Identifier" [(ngModel)]="telegrambotlink"
+        [ngModelOptions]="{standalone: true}" disabled>
+    <button class="btn btn-success" type="button" (click)="openLink(telegrambotlink())">Open</button>
+</div>
+
+@if(link().includes("medium.com")){
+<div class="fw-medium mb-2">
+    Freedium Link
+</div>
+<div class="input-group mb-4">
+    <input type="text" class="form-control" placeholder="Identifier" [(ngModel)]="freediumLink"
+        [ngModelOptions]="{standalone: true}">
+    <button class="btn btn-success" type="button" (click)="openLink(freediumLink())">Go</button>
+</div>
+}
+
+<div class="fw-medium mb-2">
+    Attach File
+</div>
+<div class="mb-4">
+    <input type="file" class="form-control" #fileTag (change)="fileTagChange($event)" accept=".zip,.7z,.rar">
+</div>
+
+<div class="text-end my-4">
+    @if(ongoing()){
+    <button class="btn btn-outline-light px-5" disabled>
+        <div class="spinner-border spinner-border-sm" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </button>
+    }
+    @else {
+    <button class="btn btn-outline-light me-2" (click)="reset()">Reset</button>
+    <button class="btn btn-success" (click)="postWisdom()">
+        @if(editMode()){
+        Edit
+        }
+        @else {
+        Submit
+        }
+    </button>
+    }
+</div>
+}
+
+@for (item of wisdoms(); track $index) {
+<div class="mb-3">
+    <img [src]="item.imageurl" class="img-fluid mb-2" />
+    <div class="mb-2 fw-semibold"><small>{{item.title}}</small></div>
+    <div><small>{{item.description}}</small></div>
+    <div><small class="opacity-75">{{ item.publishedDate | date: 'MMMM d, yyyy h:mm:ss a'}}</small></div>
+    <div class="d-flex mt-3 gap-2 flex-wrap">
+        <button class="btn btn-danger btn-sm" (click)="deleteWisdom(item)">Delete</button>
+        <button class="btn btn-outline-light btn-sm" (click)="openLink(item.ogLink)">Open Link</button>
+        @if(item.ogLink.includes("medium.com")){
+        <button class="btn btn-outline-light btn-sm" (click)="openLink(item.freediumlink)">Open Freedium Link</button>
+        }
+        <button class="btn btn-outline-light btn-sm" (click)="openLink(item.zipLink)">Open Zip</button>
+    </div>
+    <hr />
+</div>
+}

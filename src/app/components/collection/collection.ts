@@ -13,6 +13,8 @@ interface ICollection {
 	url: string;
 	password: string;
 	uploadDate: string;
+	imageExt: string;
+	folder: string
 }
 
 @Component({
@@ -40,7 +42,10 @@ export class Collection {
 	ongoing = signal<boolean>(false);
 	editMode = signal<boolean>(false);
 	currentImageHeight = signal<number>(0);
+	currentImageWidth = signal<number>(0);
+	previewImageFolder = signal<string>('');
 	unique_identifer = signal<string[]>([]);
+	previewImageExt = signal<string>('');
 	selectedCollection = signal<ICollection>({
 		altText: '',
 		description: '',
@@ -50,7 +55,9 @@ export class Collection {
 		password: '',
 		priority: 0,
 		uploadDate: '',
-		url: ''
+		url: '',
+		imageExt: '',
+		folder: 'Collection'
 	});
 	left = signal<any>([]);
 	right = signal<any>([]);
@@ -76,7 +83,7 @@ export class Collection {
 		this.http.get<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getCollection').subscribe({
 			next: data => {
 				this.collection_list.set(data);
-				this.collection_list().sort((a, b) => a.priority-b.priority);
+				this.collection_list().sort((a, b) => a.priority - b.priority);
 				this.unique_identifer.set(data.map((d: any) => d.identifier))
 				this.image_list.set(Array.from({ length: data.length + 1 }, (v, i) => i));
 				this.hydrate(this.collection_list());
@@ -105,7 +112,7 @@ export class Collection {
 
 	updatePriority(item: ICollection) {
 		this.holdEdit.set(true);
-		this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addToCollection', {...item, password: this.stateService.password()}).subscribe({
+		this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addToCollection', { ...item, password: this.stateService.password() }).subscribe({
 			next: (data) => {
 				this.holdEdit.set(false);
 				this.fetchData();
@@ -122,24 +129,30 @@ export class Collection {
 		this.alternate_text = "";
 		this.editMode.set(false);
 		this.previewUrl.set(null);
+		this.previewImageExt.set('');
+		this.previewImageFolder.set('');
 		this.priority = 1;
 		this.editable.set(false);
 		this.error = [];
 		window.scrollTo(0, 0);
 	}
 
-	onImageLoad(height: number) {
+	onImageLoad(height: number, width:number) {
 		this.currentImageHeight.set(height);
+		this.currentImageWidth.set(width);
 	}
 
-	selectEditable(item:ICollection){
+	selectEditable(item: ICollection) {
 		this.editMode.set(true);
+		this.previewImageExt.set(item.imageExt);
+		this.previewImageFolder.set(item.folder);
 		this.previewUrl.set(item.url);
 		this.alternate_text = item.altText;
 		this.desc = item.description;
 		this.identifier = item.identifier;
 		this.location = item.location;
 		this.priority = item.priority;
+		window.scrollTo(0, 0);
 	}
 
 	async uploadToCollection() {
@@ -170,18 +183,23 @@ export class Collection {
 			if (confirm("Are you sure you want to submit ?")) {
 				this.ongoing.set(true);
 				try {
-					const imageUrl = this.imageFile ? await this.uploadFiles("." + this.imageFile.name.split(".")[1], this.imageFile) : this.previewUrl();
+					const previewImageFolder = this.previewImageFolder() == '' ? 'Collection' : this.previewImageFolder();
+					const imageExt = this.previewImageExt() == '' ? "." + this.imageFile.name.split(".")[1] : this.previewImageExt();
+					const imageUrl = this.imageFile ? await this.uploadFiles(imageExt, this.imageFile) : this.previewUrl();
 
 					this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addToCollection', {
 						altText: this.alternate_text,
 						description: this.desc,
 						height: this.currentImageHeight(),
+						width : this.currentImageWidth(),
 						identifier: this.identifier.trim().replaceAll(" ", "_").toLowerCase(),
 						location: this.location,
 						priority: this.priority,
 						url: imageUrl,
 						password: this.stateService.password(),
-						uploadDate: new Date()
+						uploadDate: new Date(),
+						imageExt: imageExt,
+						folder: previewImageFolder
 					}).subscribe({
 						next: (data) => {
 							this.reset();
@@ -207,11 +225,56 @@ export class Collection {
 		}
 	}
 
+	async deleteItem(item: any) {
+		if (this.stateService.loggedIn()) {
+			if (confirm("Are you sure you want to submit ?")) {
+				this.ongoing.set(true);
+				const folder = 'folder' in item ? item.folder : 'Collection';
+				await this.deleteFromDropbox(`/${folder}/${item.identifier}${item.imageExt}`)
+				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deleteCollection", {
+					"customName": item.identifier,
+					"password": this.stateService.password()
+				}).subscribe({
+					next: res => {
+						this.fetchData();
+						this.ongoing.set(false);
+						this.reset();
+					}
+				})
+			}
+		}
+		else {
+			alert("Kindly Login");
+		}
+	}
+
+	deleteFromDropbox(path: string) {
+
+		return new Promise((resolve, reject) => {
+			const url = "https://api.dropboxapi.com/2/files/delete_v2";
+
+			const headers = new HttpHeaders({
+				"Authorization": `Bearer ${this.stateService.dropbox_access_token()}`,
+				"Content-Type": "application/json"
+			});
+
+			return this.http.post(url, { path }, { headers }).subscribe({
+				next: data => {
+					resolve("Deleted SuccessFully");
+				},
+				error: err => {
+					reject("Error in deleting")
+				}
+			});
+		})
+
+	}
+
 	uploadFiles(fileExtension: string, ogFile: File): Promise<string> {
 
 		return new Promise((resolve, reject) => {
 
-			const dropboxPath = "/Collection/" + this.identifier.trim() + fileExtension;
+			const dropboxPath = "/Collection/" + this.identifier.trim().replaceAll(" ", "_").toLowerCase() + fileExtension;
 
 			const headersUpload = new HttpHeaders({
 				"Authorization": `Bearer ${this.stateService.dropbox_access_token()}`,
