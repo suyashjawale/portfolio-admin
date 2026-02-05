@@ -67,7 +67,13 @@ export class Posts {
 	constructor(private http: HttpClient, public stateService: State) { }
 
 	ngOnInit() {
-		this.http.get<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getCollection').subscribe({
+
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
+
+		this.http.get<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getCollection', { headers }).subscribe({
 			next: data => {
 				this.unique_identifer.set(data.map((d: any) => d.identifier));
 				this.image_list.set(Array.from({ length: data.length + 1 }, (v, i) => i));
@@ -79,7 +85,13 @@ export class Posts {
 
 	getPosts() {
 		let input = prompt("Enter your number");
-		this.http.post<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getPosts', { "number": input }).subscribe({
+
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
+
+		this.http.post<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getPosts', { "number": input }, { headers }).subscribe({
 			next: data => {
 				this.posts.set(data['posts'].map((element: any) => {
 					return { ...element, 'isDisabled': true }
@@ -124,6 +136,12 @@ export class Posts {
 						imageUrl = this.imageFile ? await this.uploadFiles(imageExt, this.imageFile) : this.previewUrl();
 					}
 
+
+					const headers = new HttpHeaders({
+						'Content-Type': 'application/json',
+						'X-Site-Identity': 'portfolio-admin-v1'
+					});
+
 					this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addPost', {
 						location: this.location,
 						isCollection: this.addToCollection(),
@@ -137,7 +155,7 @@ export class Posts {
 						imageExt: imageExt,
 						height: this.currentImageHeight(),
 						width: this.currentImageWidth()
-					}).subscribe({
+					}, { headers }).subscribe({
 						next: (data) => {
 
 							if (this.addToCollection()) {
@@ -154,7 +172,7 @@ export class Posts {
 									uploadDate: new Date(),
 									imageExt: imageExt,
 									folder: 'Posts'
-								}).subscribe({
+								}, { headers }).subscribe({
 									next: (data) => {
 										alert("Post added successfully")
 										this.reset();
@@ -276,6 +294,12 @@ export class Posts {
 	}
 
 	editPost(item: any) {
+
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
+
 		this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addPost', {
 			location: item.location,
 			isCollection: item.isCollection,
@@ -289,7 +313,7 @@ export class Posts {
 			password: this.stateService.password(),
 			height: this.currentImageHeight(),
 			width: this.currentImageWidth()
-		}).subscribe({
+		}, { headers }).subscribe({
 			next: (data) => {
 				alert("Post Updated");
 				this.getPosts();
@@ -306,10 +330,16 @@ export class Posts {
 				this.ongoing.set(true);
 				if (item.imageUrl != '' && !item.isCollection)
 					await this.deleteFromDropbox(`/Posts/${item.identifier}${item.imageExt}`)
+
+				const headers = new HttpHeaders({
+					'Content-Type': 'application/json',
+					'X-Site-Identity': 'portfolio-admin-v1'
+				});
+
 				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deletePost", {
 					"customName": item.identifier,
 					"password": this.stateService.password()
-				}).subscribe({
+				}, { headers }).subscribe({
 					next: res => {
 						this.getPosts();
 						this.ongoing.set(false);

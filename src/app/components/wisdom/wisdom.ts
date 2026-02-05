@@ -41,7 +41,13 @@ export class Wisdom {
 	}
 
 	fetchDetails() {
-		this.http.post('https://dashing-llama-639318.netlify.app/.netlify/functions/getBlogDetails', { "password": this.stateService.password(), "link": this.link() }, { responseType: 'text' }).subscribe({
+
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
+
+		this.http.post('https://dashing-llama-639318.netlify.app/.netlify/functions/getBlogDetails', { "password": this.stateService.password(), "link": this.link() }, { responseType: 'text', headers }).subscribe({
 			next: async (data: string) => {
 				const parser = new DOMParser();
 				const doc = parser.parseFromString(data, 'text/html');
@@ -82,7 +88,13 @@ export class Wisdom {
 	}
 
 	fetchLinks() {
-		this.http.get('https://dashing-llama-639318.netlify.app/.netlify/functions/getWisdom').subscribe({
+
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
+
+		this.http.get('https://dashing-llama-639318.netlify.app/.netlify/functions/getWisdom', { headers }).subscribe({
 			next: (data) => {
 				this.wisdoms.set(data);
 			},
@@ -137,7 +149,7 @@ export class Wisdom {
 					});
 
 
-					this.http.post('https://dashing-llama-639318.netlify.app/.netlify/functions/addWisdom', payload, {headers}).subscribe({
+					this.http.post('https://dashing-llama-639318.netlify.app/.netlify/functions/addWisdom', payload, { headers }).subscribe({
 						next: (data) => {
 							this.wisdoms.set(data);
 							this.reset();
@@ -165,10 +177,16 @@ export class Wisdom {
 				this.ongoing.set(true);
 				await this.deleteFromDropbox(`/Wisdom/${item.identifier}${item.imageExtn}`)
 				await this.deleteFromDropbox(`/Wisdom/${item.identifier}${item.zipExtn}`)
+
+				const headers = new HttpHeaders({
+					'Content-Type': 'application/json',
+					'X-Site-Identity': 'portfolio-admin-v1'
+				});
+
 				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deleteWisdom", {
 					"customName": item.identifier,
 					"password": this.stateService.password()
-				}).subscribe({
+				}, { headers }).subscribe({
 					next: res => {
 						this.fetchLinks();
 						this.ongoing.set(false);

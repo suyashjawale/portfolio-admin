@@ -80,7 +80,13 @@ export class Collection {
 	}
 
 	fetchData() {
-		this.http.get<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getCollection').subscribe({
+
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
+
+		this.http.get<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getCollection', { headers }).subscribe({
 			next: data => {
 				this.collection_list.set(data);
 				this.collection_list().sort((a, b) => a.priority - b.priority);
@@ -112,7 +118,13 @@ export class Collection {
 
 	updatePriority(item: ICollection) {
 		this.holdEdit.set(true);
-		this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addToCollection', { ...item, password: this.stateService.password() }).subscribe({
+
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
+
+		this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addToCollection', { ...item, password: this.stateService.password() }, { headers }).subscribe({
 			next: (data) => {
 				this.holdEdit.set(false);
 				this.fetchData();
@@ -137,7 +149,7 @@ export class Collection {
 		window.scrollTo(0, 0);
 	}
 
-	onImageLoad(height: number, width:number) {
+	onImageLoad(height: number, width: number) {
 		this.currentImageHeight.set(height);
 		this.currentImageWidth.set(width);
 	}
@@ -187,11 +199,17 @@ export class Collection {
 					const imageExt = this.previewImageExt() == '' ? "." + this.imageFile.name.split(".")[1] : this.previewImageExt();
 					const imageUrl = this.imageFile ? await this.uploadFiles(imageExt, this.imageFile) : this.previewUrl();
 
+
+					const headers = new HttpHeaders({
+						'Content-Type': 'application/json',
+						'X-Site-Identity': 'portfolio-admin-v1'
+					});
+
 					this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addToCollection', {
 						altText: this.alternate_text,
 						description: this.desc,
 						height: this.currentImageHeight(),
-						width : this.currentImageWidth(),
+						width: this.currentImageWidth(),
 						identifier: this.identifier.trim().replaceAll(" ", "_").toLowerCase(),
 						location: this.location,
 						priority: this.priority,
@@ -200,7 +218,7 @@ export class Collection {
 						uploadDate: new Date(),
 						imageExt: imageExt,
 						folder: previewImageFolder
-					}).subscribe({
+					}, { headers }).subscribe({
 						next: (data) => {
 							this.reset();
 							alert("Image File Uploaded SuccessFully")
@@ -231,10 +249,16 @@ export class Collection {
 				this.ongoing.set(true);
 				const folder = 'folder' in item ? item.folder : 'Collection';
 				await this.deleteFromDropbox(`/${folder}/${item.identifier}${item.imageExt}`)
+
+				const headers = new HttpHeaders({
+					'Content-Type': 'application/json',
+					'X-Site-Identity': 'portfolio-admin-v1'
+				});
+
 				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deleteCollection", {
 					"customName": item.identifier,
 					"password": this.stateService.password()
-				}).subscribe({
+				}, { headers }).subscribe({
 					next: res => {
 						this.fetchData();
 						this.ongoing.set(false);

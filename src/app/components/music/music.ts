@@ -74,7 +74,13 @@ export class Music {
 	}
 
 	updateSongList() {
-		this.http.get<Song[]>('https://dashing-llama-639318.netlify.app/.netlify/functions/fetchSongs').subscribe({
+
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
+
+		this.http.get<Song[]>('https://dashing-llama-639318.netlify.app/.netlify/functions/fetchSongs', { headers }).subscribe({
 			next: (data: Song[]) => {
 				data = data.map(item => ({ ...item, tempRank: item.rank }));
 				if (this.sortCriteria == 'queueNumber')
@@ -106,11 +112,17 @@ export class Music {
 
 	updateRank(song: Song) {
 		this.holdEdit.set(true);
+
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
+
 		this.http.post('https://dashing-llama-639318.netlify.app/.netlify/functions/updateRank', {
 			"customName": song.customName,
 			"password": this.stateService.password(),
 			"rank": song.tempRank
-		}).pipe(finalize(() => {
+		}, { headers }).pipe(finalize(() => {
 			this.holdEdit.set(false);
 		}))
 			.subscribe({
@@ -165,6 +177,12 @@ export class Music {
 					const musicUrl = this.musicFile ? await this.uploadFiles(musicExt, this.musicFile) : this.previewAudio();
 					const thumnailUrl = this.imageFile ? await this.uploadFiles(imageExt, this.imageFile) : this.previewUrl();
 
+
+					const headers = new HttpHeaders({
+						'Content-Type': 'application/json',
+						'X-Site-Identity': 'portfolio-admin-v1'
+					});
+
 					this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addSong', {
 						"songName": this.songName.trim(),
 						"artistName": this.artistName.trim(),
@@ -177,7 +195,7 @@ export class Music {
 						"queueNumber": this.songList().length,
 						"musicExt": musicExt,
 						"imageExt": imageExt
-					}).subscribe({
+					}, { headers }).subscribe({
 						next: (data) => {
 							this.reset();
 							this.updateSongList();
@@ -242,10 +260,16 @@ export class Music {
 				this.ongoing.set(true);
 				await this.deleteFromDropbox(`/Music/${song.customName}${song.imageExt}`)
 				await this.deleteFromDropbox(`/Music/${song.customName}${song.musicExt}`)
+
+				const headers = new HttpHeaders({
+					'Content-Type': 'application/json',
+					'X-Site-Identity': 'portfolio-admin-v1'
+				});
+
 				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deleteSong", {
 					"customName": song.customName,
 					"password": this.stateService.password()
-				}).subscribe({
+				}, { headers }).subscribe({
 					next: res => {
 						this.updateSongList();
 						this.ongoing.set(false);
