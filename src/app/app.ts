@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule, NgModel } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { State } from './services/state';
 
 @Component({
@@ -21,10 +21,14 @@ export class App {
 	openAuthenticationDialog() {
 		let input = prompt("Please enter password");
 
+		const headers = new HttpHeaders({
+			'Content-Type': 'application/json',
+			'X-Site-Identity': 'portfolio-admin-v1'
+		});
 		if (input != null && input != undefined && input != "") {
 			this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/authenticate', {
 				password: input
-			}).subscribe({
+			}, {headers}).subscribe({
 				next: (data:any) => {
 					this.stateService.loggedIn.set(true);
 					this.stateService.password.set(input);
