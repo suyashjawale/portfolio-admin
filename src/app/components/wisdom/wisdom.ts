@@ -53,23 +53,23 @@ export class Wisdom {
 				const doc = parser.parseFromString(data, 'text/html');
 
 				const titleTag = doc.querySelector('title');
-				this.title.set(titleTag ? titleTag.textContent : 'N/A')
+				this.title.set(titleTag ? titleTag.textContent : '')
 
 				const descriptionTag = doc.querySelector("meta[name='description']") || doc.querySelector("meta[property='og:description']");
-				const content = descriptionTag ? descriptionTag.getAttribute('content') : 'N/A';
-				this.description.set(content || 'N/A');
+				const content = descriptionTag ? descriptionTag.getAttribute('content') : '';
+				this.description.set(content || '');
 
 				const imageTag = doc.querySelector("meta[property='og:image']") || doc.querySelector("meta[name='image']");
-				const preview = imageTag ? imageTag.getAttribute('content') : 'N/A';
-				this.previewUrl.set(preview || 'N/A');
+				const preview = imageTag ? imageTag.getAttribute('content') : '';
+				this.previewUrl.set(preview || '');
 
 				const response = await fetch(this.previewUrl(), { method: 'HEAD' });
 				const contentType = response.headers.get('Content-Type')?.split("/")[1];
-				this.imageExt.set("." + contentType || '')
+				this.imageExt.set("." + contentType || '');
 
 				const publishDate = doc.querySelector("meta[property='article:published_time']");
-				const pubDate = publishDate ? publishDate.getAttribute('content') : 'N/A';
-				this.publishedDate.set(pubDate || 'N/A');
+				const pubDate = publishDate ? publishDate.getAttribute('content') : '';
+				this.publishedDate.set(pubDate || '');
 
 				if (this.link().includes("medium.com")) {
 					this.freediumLink.set('https://freedium-mirror.cfd/' + this.link())
@@ -95,8 +95,8 @@ export class Wisdom {
 		});
 
 		this.http.get('https://dashing-llama-639318.netlify.app/.netlify/functions/getWisdom', { headers }).subscribe({
-			next: (data) => {
-				this.wisdoms.set(data);
+			next: (data : any) => {
+				this.wisdoms.set(data.sort((a:any, b:any) => b.uploadIndex - a.uploadIndex));
 			},
 			error: err => {
 				this.wisdoms.set([]);
@@ -140,7 +140,8 @@ export class Wisdom {
 						'height': this.imageHeight(),
 						'width': this.imageWidth(),
 						'identifier': this.identifier().trim().replaceAll(" ", "_").toLowerCase(),
-						'password': this.stateService.password()
+						'password': this.stateService.password(),
+						'uploadIndex' : this.wisdoms().length
 					}
 
 					const headers = new HttpHeaders({
