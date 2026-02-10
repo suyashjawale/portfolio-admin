@@ -80,18 +80,25 @@ export class Posts {
 			}
 		});
 
-		this.getPosts();
+
+			this.getPosts(localStorage.getItem('number') || '');
+
 	}
 
-	getPosts() {
-		let input = prompt("Enter your number");
+	getPosts(number:string) {
+		if(number==''){
+			let input = prompt("Enter your number");
+			if(input !== null) {
+				localStorage.setItem('number', input);
+			}
+		}
 
 		const headers = new HttpHeaders({
 			'Content-Type': 'application/json',
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.post<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getPosts', { "number": input }, { headers }).subscribe({
+		this.http.post<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getPosts', { "number": number }, { headers }).subscribe({
 			next: data => {
 				this.posts.set(data['posts'].map((element: any) => {
 					return { ...element, 'isDisabled': true }
@@ -176,7 +183,7 @@ export class Posts {
 									next: (data) => {
 										alert("Post added successfully")
 										this.reset();
-										this.getPosts();
+										this.getPosts(localStorage.getItem('number') || '');
 									},
 									error: (err) => {
 										alert("Failed While Pushing Into Collection")
@@ -186,7 +193,7 @@ export class Posts {
 							else {
 								alert("Post added successfully")
 								this.reset();
-								this.getPosts();
+								this.getPosts(localStorage.getItem('number') || '');
 							}
 						},
 						error: (error) => {
@@ -311,12 +318,12 @@ export class Posts {
 			timestamp: new Date(),
 			imageExt: item.imageExt,
 			password: this.stateService.password(),
-			height: this.currentImageHeight(),
-			width: this.currentImageWidth()
+			height: item.height,
+			width: item.width
 		}, { headers }).subscribe({
 			next: (data) => {
 				alert("Post Updated");
-				this.getPosts();
+				this.getPosts(localStorage.getItem('number') || '');
 			},
 			error: (err: any) => {
 				alert("Oops ! Error Occured")
@@ -341,7 +348,7 @@ export class Posts {
 					"password": this.stateService.password()
 				}, { headers }).subscribe({
 					next: res => {
-						this.getPosts();
+						this.getPosts(localStorage.getItem('number') || '');
 						this.ongoing.set(false);
 						this.reset();
 					}
