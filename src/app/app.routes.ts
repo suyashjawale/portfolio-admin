@@ -4,6 +4,7 @@ import { Birthday } from './components/birthday/birthday';
 import { Collection } from './components/collection/collection';
 import { Posts } from './components/posts/posts';
 import { Wisdom } from './components/wisdom/wisdom';
+import { Movies } from './components/movies/movies';
 
 export const routes: Routes = [
     {
@@ -30,5 +31,9 @@ export const routes: Routes = [
     {
         path: 'wisdom',
         component: Wisdom
+    },
+    {
+        path: 'movies',
+        component : Movies
     }
 ];

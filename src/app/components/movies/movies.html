@@ -1,0 +1,36 @@
+@if(error.length>0){
+<div class="alert alert-primary bg-primary text-white" role="alert">
+    @for (err of error; track $index) {
+    <small>{{err}}</small><br />
+    }
+</div>
+}
+
+<div class="fw-medium mb-2">
+    Link
+</div>
+<input type="text" class="form-control mb-4" placeholder="Movie Link" [(ngModel)]="link"
+    [ngModelOptions]="{standalone: true}">
+
+
+<div class="fw-medium mb-2">
+    Name
+</div>
+<input type="text" class="form-control" placeholder="Movie Name" [(ngModel)]="name"
+    [ngModelOptions]="{standalone: true}">
+
+
+<div class="text-end my-4">
+    @if(ongoing()){
+    <button class="btn btn-outline-light px-5" disabled>
+        <div class="spinner-border spinner-border-sm" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </button>
+    }
+    @else {
+    <button class="btn btn-success" (click)="postMovie()">
+        Submit
+    </button>
+    }
+</div>
