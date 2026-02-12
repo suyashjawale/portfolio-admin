@@ -50,8 +50,8 @@
 </div>
 
 <div class="mb-4">
-    <input type="text" class="form-control" placeholder="Post Body" [(ngModel)]="body"
-        [ngModelOptions]="{standalone: true}">
+    <textarea class="form-control" placeholder="Post Body" [(ngModel)]="body"
+        [ngModelOptions]="{standalone: true}"></textarea>
 </div>
 
 <div class="fw-medium mb-2">
@@ -128,8 +128,9 @@
     </div>
 
     <div class="mb-2">
-        <input type="text" class="form-control" placeholder="Post Body" [(ngModel)]="item.postBody"
-            [ngModelOptions]="{standalone: true}" [disabled]="item.isDisabled">
+                <textarea class="form-control" placeholder="Post Body" [(ngModel)]="item.postBody"
+            [ngModelOptions]="{standalone: true}" [disabled]="item.isDisabled"></textarea>
+
     </div>
 
     <div class="mb-2">
