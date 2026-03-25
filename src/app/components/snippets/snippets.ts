@@ -125,7 +125,7 @@ export class Snippets {
 				});
 
 				this.http.post<boolean>(environment.domain + '.netlify/functions/addSnippet', {
-					"identifier": this.identifier(),
+					"identifier": this.identifier().trim().replaceAll(" ", "_").toLowerCase(),
 					"title": this.title(),
 					"codeBlocks": this.codeBlock(),
 					"password": this.stateService.password(),
