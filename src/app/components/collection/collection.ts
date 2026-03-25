@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, ElementRef, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { State } from '../../services/state';
+import { environment } from '../../../environment/environment';
 
 interface ICollection {
 	altText: string;
@@ -86,7 +87,7 @@ export class Collection {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.get<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getCollection', { headers }).subscribe({
+		this.http.get<any>(environment.domain+'.netlify/functions/getCollection', { headers }).subscribe({
 			next: data => {
 				this.collection_list.set(data);
 				this.collection_list().sort((a, b) => a.priority - b.priority);
@@ -124,7 +125,7 @@ export class Collection {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addToCollection', { ...item, password: this.stateService.password() }, { headers }).subscribe({
+		this.http.post<boolean>(environment.domain+'.netlify/functions/addToCollection', { ...item, password: this.stateService.password() }, { headers }).subscribe({
 			next: (data) => {
 				this.holdEdit.set(false);
 				this.fetchData();
@@ -205,7 +206,7 @@ export class Collection {
 						'X-Site-Identity': 'portfolio-admin-v1'
 					});
 
-					this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addToCollection', {
+					this.http.post<boolean>(environment.domain+'.netlify/functions/addToCollection', {
 						altText: this.alternate_text,
 						description: this.desc,
 						height: this.currentImageHeight(),
@@ -255,7 +256,7 @@ export class Collection {
 					'X-Site-Identity': 'portfolio-admin-v1'
 				});
 
-				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deleteCollection", {
+				this.http.post(environment.domain+".netlify/functions/deleteCollection", {
 					"customName": item.identifier,
 					"password": this.stateService.password()
 				}, { headers }).subscribe({

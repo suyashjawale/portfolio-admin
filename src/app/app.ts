@@ -3,6 +3,7 @@ import { FormsModule, NgModel } from '@angular/forms';
 import { Router, RouterOutlet } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { State } from './services/state';
+import { environment } from '../environment/environment';
 
 @Component({
 	selector: 'app-root',
@@ -26,7 +27,7 @@ export class App {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 		if (input != null && input != undefined && input != "") {
-			this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/authenticate', {
+			this.http.post<boolean>(environment.domain+'.netlify/functions/authenticate', {
 				password: input
 			}, {headers}).subscribe({
 				next: (data:any) => {

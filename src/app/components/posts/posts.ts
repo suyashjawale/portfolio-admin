@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, ElementRef, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { State } from '../../services/state';
+import { environment } from '../../../environment/environment';
 
 interface IPost {
 	location: string,
@@ -73,7 +74,7 @@ export class Posts {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.get<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getCollection', { headers }).subscribe({
+		this.http.get<any>(environment.domain+ '.netlify/functions/getCollection', { headers }).subscribe({
 			next: data => {
 				this.unique_identifer.set(data.map((d: any) => d.identifier));
 				this.image_list.set(Array.from({ length: data.length + 1 }, (v, i) => i));
@@ -98,7 +99,7 @@ export class Posts {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.post<any>('https://dashing-llama-639318.netlify.app/.netlify/functions/getPosts', { "number": number }, { headers }).subscribe({
+		this.http.post<any>(environment.domain+ '.netlify/functions/getPosts', { "number": number }, { headers }).subscribe({
 			next: data => {
 				this.posts.set(data['posts'].map((element: any) => {
 					return { ...element, 'isDisabled': true }
@@ -149,7 +150,7 @@ export class Posts {
 						'X-Site-Identity': 'portfolio-admin-v1'
 					});
 
-					this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addPost', {
+					this.http.post<boolean>(environment.domain+ '.netlify/functions/addPost', {
 						location: this.location,
 						isCollection: this.addToCollection(),
 						imageUrl: imageUrl,
@@ -166,7 +167,7 @@ export class Posts {
 						next: (data) => {
 
 							if (this.addToCollection()) {
-								this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addToCollection', {
+								this.http.post<boolean>(environment.domain+'.netlify/functions/addToCollection', {
 									altText: this.alternate_text,
 									description: this.desc,
 									height: this.currentImageHeight(),
@@ -307,7 +308,7 @@ export class Posts {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addPost', {
+		this.http.post<boolean>(environment.domain+ '.netlify/functions/addPost', {
 			location: item.location,
 			isCollection: item.isCollection,
 			imageUrl: item.imageUrl,
@@ -343,7 +344,7 @@ export class Posts {
 					'X-Site-Identity': 'portfolio-admin-v1'
 				});
 
-				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deletePost", {
+				this.http.post(environment.domain+ ".netlify/functions/deletePost", {
 					"customName": item.identifier,
 					"password": this.stateService.password()
 				}, { headers }).subscribe({

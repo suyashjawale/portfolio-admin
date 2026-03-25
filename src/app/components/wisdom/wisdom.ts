@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { State } from '../../services/state';
 import { zip } from 'rxjs';
 import { DatePipe } from '@angular/common';
+import { environment } from '../../../environment/environment';
 
 @Component({
 	selector: 'app-wisdom',
@@ -47,7 +48,7 @@ export class Wisdom {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.post('https://dashing-llama-639318.netlify.app/.netlify/functions/getBlogDetails', { "password": this.stateService.password(), "link": this.link() }, { responseType: 'text', headers }).subscribe({
+		this.http.post(environment.domain+ '.netlify/functions/getBlogDetails', { "password": this.stateService.password(), "link": this.link() }, { responseType: 'text', headers }).subscribe({
 			next: async (data: string) => {
 				const parser = new DOMParser();
 				const doc = parser.parseFromString(data, 'text/html');
@@ -94,7 +95,7 @@ export class Wisdom {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.get('https://dashing-llama-639318.netlify.app/.netlify/functions/getWisdom', { headers }).subscribe({
+		this.http.get(environment.domain+ '.netlify/functions/getWisdom', { headers }).subscribe({
 			next: (data : any) => {
 				this.wisdoms.set(data.sort((a:any, b:any) => b.uploadIndex - a.uploadIndex));
 			},
@@ -150,7 +151,7 @@ export class Wisdom {
 					});
 
 
-					this.http.post('https://dashing-llama-639318.netlify.app/.netlify/functions/addWisdom', payload, { headers }).subscribe({
+					this.http.post(environment.domain + '.netlify/functions/addWisdom', payload, { headers }).subscribe({
 						next: (data) => {
 							this.wisdoms.set(data);
 							this.reset();
@@ -184,7 +185,7 @@ export class Wisdom {
 					'X-Site-Identity': 'portfolio-admin-v1'
 				});
 
-				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deleteWisdom", {
+				this.http.post( environment.domain+ ".netlify/functions/deleteWisdom", {
 					"customName": item.identifier,
 					"password": this.stateService.password()
 				}, { headers }).subscribe({

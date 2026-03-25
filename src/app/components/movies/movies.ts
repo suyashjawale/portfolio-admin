@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { State } from '../../services/state';
+import { environment } from '../../../environment/environment';
 
 @Component({
     selector: 'app-movies',
@@ -43,7 +44,7 @@ export class Movies {
                     "password": this.stateService.password()
                 }
 
-                this.http.post('https://dashing-llama-639318.netlify.app/.netlify/functions/addMovie', payload, { headers }).subscribe({
+                this.http.post(environment.domain+'.netlify/functions/addMovie', payload, { headers }).subscribe({
                     next: (data) => {
                         this.reset();
                     },

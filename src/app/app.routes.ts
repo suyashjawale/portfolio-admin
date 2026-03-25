@@ -5,6 +5,7 @@ import { Collection } from './components/collection/collection';
 import { Posts } from './components/posts/posts';
 import { Wisdom } from './components/wisdom/wisdom';
 import { Movies } from './components/movies/movies';
+import { Snippets } from './components/snippets/snippets';
 
 export const routes: Routes = [
     {
@@ -34,6 +35,10 @@ export const routes: Routes = [
     },
     {
         path: 'movies',
-        component : Movies
+        component: Movies
+    },
+    {
+        path: 'snippets',
+        component: Snippets
     }
 ];

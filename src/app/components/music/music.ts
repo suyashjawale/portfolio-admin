@@ -6,6 +6,7 @@ import { Song } from '../../interfaces/song';
 import { finalize } from 'rxjs';
 import { SortPipe } from '../../pipes/sort-pipe';
 import { DomSanitizer } from '@angular/platform-browser';
+import { environment } from '../../../environment/environment';
 
 @Component({
 	selector: 'app-music',
@@ -80,7 +81,7 @@ export class Music {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.get<Song[]>('https://dashing-llama-639318.netlify.app/.netlify/functions/fetchSongs', { headers }).subscribe({
+		this.http.get<Song[]>(environment.domain+'.netlify/functions/fetchSongs', { headers }).subscribe({
 			next: (data: Song[]) => {
 				data = data.map(item => ({ ...item, tempRank: item.rank }));
 				if (this.sortCriteria == 'queueNumber')
@@ -118,7 +119,7 @@ export class Music {
 			'X-Site-Identity': 'portfolio-admin-v1'
 		});
 
-		this.http.post('https://dashing-llama-639318.netlify.app/.netlify/functions/updateRank', {
+		this.http.post(environment.domain+'.netlify/functions/updateRank', {
 			"customName": song.customName,
 			"password": this.stateService.password(),
 			"rank": song.tempRank
@@ -183,7 +184,7 @@ export class Music {
 						'X-Site-Identity': 'portfolio-admin-v1'
 					});
 
-					this.http.post<boolean>('https://dashing-llama-639318.netlify.app/.netlify/functions/addSong', {
+					this.http.post<boolean>(environment.domain+'.netlify/functions/addSong', {
 						"songName": this.songName.trim(),
 						"artistName": this.artistName.trim(),
 						"songLink": musicUrl,
@@ -266,7 +267,7 @@ export class Music {
 					'X-Site-Identity': 'portfolio-admin-v1'
 				});
 
-				this.http.post("https://dashing-llama-639318.netlify.app/.netlify/functions/deleteSong", {
+				this.http.post(environment.domain+".netlify/functions/deleteSong", {
 					"customName": song.customName,
 					"password": this.stateService.password()
 				}, { headers }).subscribe({
